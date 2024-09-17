@@ -77,7 +77,7 @@ INSERT INTO Track (title, artist, year, time, plays, genre) VALUES
 ('Rolling in the Deep', 5, 2010, 348, 10000, 2);
 
 
--- Добавляем данные в таблицу Artist
+-- Добавляем данные в таблицу Users
 INSERT INTO Users (login) VALUES 
 ('Admin'),
 ('Guest1'),
@@ -85,7 +85,7 @@ INSERT INTO Users (login) VALUES
 ('Guest3'),
 ('Guest4');
 
--- Добавляем данные в таблицу Artist
+-- Добавляем данные в таблицу Listening
 INSERT INTO Listening (track_id, listener, playedAt) VALUES 
 (2, 1, '2024-01-08 04:05:06'),
 (2, 2, '2024-01-08 04:05:06'),
