@@ -11,6 +11,57 @@
 
 ![alt text](image-1.png)
 
+``` sql
+create table student15.books_master
+(
+    book_id   integer default nextval('books_master_book_id_seq'::regclass) not null,
+    title     varchar(255)                                                  not null,
+    year      integer,
+    genre_id  integer
+        references student15.genre,
+    downloads integer default 0
+)
+    partition by RANGE (downloads);
+
+alter table student15.books_master
+    owner to student15;
+
+create table student15.books_unpopular
+    partition of student15.books_master
+        (
+            constraint books_master_genre_id_fkey
+                foreign key (genre_id) references student15.genre
+            )
+        FOR VALUES FROM (MINVALUE) TO (1000);
+
+alter table student15.books_unpopular
+    owner to student15;
+
+create table student15.books_popular
+    partition of student15.books_master
+        (
+            constraint books_master_genre_id_fkey
+                foreign key (genre_id) references student15.genre
+            )
+        FOR VALUES FROM (1000) TO (10000);
+
+alter table student15.books_popular
+    owner to student15;
+
+create table student15.books_bestseller
+    partition of student15.books_master
+        (
+            constraint books_master_genre_id_fkey
+                foreign key (genre_id) references student15.genre
+            )
+        FOR VALUES FROM (10000) TO (MAXVALUE);
+
+alter table student15.books_bestseller
+    owner to student15;
+```
+
+
+
 ## Задание 3
 Напишите запросы для наполнения БД. Выполните запросы на учебной схеме БД.
 
@@ -27,32 +78,25 @@
 | Уравнение Бога. В поисках теории всего | Митио Каку                 | 2021 | 200     | Non-fiction         | 1700        |
 
 ``` sql
-create table student15.book
-(
-    book_id   serial
-        primary key,
-    title     varchar(255) not null,
-    year      integer,
-    genre_id  integer
-        references student15.genre,
-    downloads integer default 0
-);
-
-alter table student15.book
-    owner to student15;
+INSERT INTO student15.books_master (book_id, title, year, genre_id, downloads) VALUES (1, 'Физика невозможного', 2008, 1, 2000);
+INSERT INTO student15.books_master (book_id, title, year, genre_id, downloads) VALUES (2, 'Уравнение Бога', 2021, 2, 1700);
+INSERT INTO student15.books_master (book_id, title, year, genre_id, downloads) VALUES (3, 'Кюхля', 1925, 3, 2300);
+INSERT INTO student15.books_master (book_id, title, year, genre_id, downloads) VALUES (4, 'Понедельник начинается в субботу', 1964, 4, 21000);
+INSERT INTO student15.books_master (book_id, title, year, genre_id, downloads) VALUES (5, 'Эгоистичный ген', 1989, 2, 400);
+INSERT INTO student15.books_master (book_id, title, year, genre_id, downloads) VALUES (6, 'Вы, конечно, шутите, мистер Фейнман!', 1985, 8, 1000);
+INSERT INTO student15.books_master (book_id, title, year, genre_id, downloads) VALUES (7, 'За миллиард лет до конца света', 1977, 5, 20000);
 ```
 
 | book\_id | title | year | genre\_id | downloads |
 | :--- | :--- | :--- | :--- | :--- |
-| 7 | The Lord of the Rings | 1954 | 8 | 5000 |
-| 2 | The Catcher in the Rye | 1951 | 2 | 12000 |
-| 5 | To Kill a Mockingbird | 1960 | 2 | 18000 |
-| 3 | 1984 | 1949 | 3 | 1000 |
-| 1 | The Iliad | -800 | 1 | 500 |
-| 8 | Anna Karenina | 1877 | 5 | 8000 |
-| 6 | The Great Gatsby | 1925 | 2 | 250 |
-| 4 | Pride and Prejudice | 1813 | 4 | 3500 |
-| 10 | Доктор Живаго | 1955 | 3 | 20300 |
+| 1 | Физика невозможного | 2008 | 1 | 2000 |
+| 2 | Уравнение Бога | 2021 | 2 | 1700 |
+| 3 | Кюхля | 1925 | 3 | 2300 |
+| 4 | Понедельник начинается в субботу | 1964 | 4 | 21000 |
+| 5 | Эгоистичный ген | 1989 | 2 | 400 |
+| 6 | Вы, конечно, шутите, мистер Фейнман! | 1985 | 8 | 1000 |
+| 7 | За миллиард лет до конца света | 1977 | 5 | 20000 |
+
 
 
 Напишите запрос для получения списка rowid записей в таблицах с книгами, авторами и жанрами.
