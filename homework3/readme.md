@@ -1,34 +1,65 @@
-Задание 1
+## Задание 1
 Напишите запросы для создания таблицы, cпроектированной в Домашнем задании №1 Базы данных электронных книг, добавьте связи между таблицами. Выполните запросы на учебной схеме БД.
 
-Задание 2
+## Задание 2
 Для таблицы со список книг добавьте разделы партиционирования методом Range по количеству скачиваний:
 
-P1: число скачиваний меньше 1000;
-P2: число скачиваний больше или равно 1000 и меньше 10000;
-P3: число скачиваний больше или равно 10000.
+* P1: число скачиваний меньше 1000;
+* P2: число скачиваний больше или равно 1000 и меньше 10000;
+* P3: число скачиваний больше или равно 10000.
 Добавьте в отчет результаты выполнения запросов (например, скрин схемы БД).
 
 ![alt text](image-1.png)
 
-Задание 3
+## Задание 3
 Напишите запросы для наполнения БД. Выполните запросы на учебной схеме БД.
 
 Добавьте в отчет результат выполнения запросов – скрины заполненных таблиц, результаты вызова к партициям.
 
-Название Автор Год Страниц Жанр Скачиваний
-Физика невозможного Митио Каку 2008 460 Non-fiction 2000
-Эгоистичный ген Ричард Докинз 1989 610 Non-fiction 400
-Вы, конечно, шутите, мистер Фейнман! Ричард Фейнман 1985 450 Non-fiction 1000
-Кюхля Юрий Тынянов 1925 350 Исторический роман 2300
-За миллиард лет до конца света Аркадий и Борис Стругацкие 1977 150 Фантастика 20000
-Понедельник начинается в субботу Аркадий и Борис Стругацкие 1964 250 Фантастика 21000
-Уравнение Бога. В поисках теории всего Митио Каку 2021 200 Non-fiction 1700
+| Название                               | Автор                      | Год  | Страниц | Жанр                | Скачиваний  |
+|----------------------------------------|----------------------------|------|---------|---------------------|-------------|
+| Физика невозможного                    | Митио Каку                 | 2008 | 460     | Non-fiction         | 2000        |
+| Эгоистичный ген                        | Ричард Докинз              | 1989 | 610     | Non-fiction         | 400         |
+| Вы, конечно, шутите, мистер Фейнман!   | Ричард Фейнман             | 1985 | 450     | Non-fiction         | 1000        |
+| Кюхля                                  | Юрий Тынянов               | 1925 | 350     | Исторический роман  | 2300        |
+| За миллиард лет до конца света         | Аркадий и Борис Стругацкие | 1977 | 150     | Фантастика          | 20000       |
+| Понедельник начинается в субботу       | Аркадий и Борис Стругацкие | 1964 | 250     | Фантастика          | 21000       |
+| Уравнение Бога. В поисках теории всего | Митио Каку                 | 2021 | 200     | Non-fiction         | 1700        |
+
+``` sql
+create table student15.book
+(
+    book_id   serial
+        primary key,
+    title     varchar(255) not null,
+    year      integer,
+    genre_id  integer
+        references student15.genre,
+    downloads integer default 0
+);
+
+alter table student15.book
+    owner to student15;
+```
+
+| book\_id | title | year | genre\_id | downloads |
+| :--- | :--- | :--- | :--- | :--- |
+| 7 | The Lord of the Rings | 1954 | 8 | 5000 |
+| 2 | The Catcher in the Rye | 1951 | 2 | 12000 |
+| 5 | To Kill a Mockingbird | 1960 | 2 | 18000 |
+| 3 | 1984 | 1949 | 3 | 1000 |
+| 1 | The Iliad | -800 | 1 | 500 |
+| 8 | Anna Karenina | 1877 | 5 | 8000 |
+| 6 | The Great Gatsby | 1925 | 2 | 250 |
+| 4 | Pride and Prejudice | 1813 | 4 | 3500 |
+| 10 | Доктор Живаго | 1955 | 3 | 20300 |
 
 
 Напишите запрос для получения списка rowid записей в таблицах с книгами, авторами и жанрами.
 
+``` sql
 select CTID, book_id from books_master;
+```
 
 | ctid | book\_id |
 | :--- | :--- |
@@ -42,17 +73,22 @@ select CTID, book_id from books_master;
 
 Проведите анализ значений rowid, приложите информацию в отчет.
 
-ctid - служебный идентификатор, который "уникальный" в рамках таблицы (не таблиц), несёт в себе больше идею версионирования строк, чем являться привычным первичным ключём. Активно используется самой базой данных и поэтому использовать его как id не самая лучшая идея (см. подробнее https://dev.to/ngfizzy/postgresql-pseudocolumns-ctid-108a [Confirming The Characteristics Of CTID the Column]).
+ctid - служебный идентификатор, который "уникальный" в рамках таблицы (не таблиц), несёт в себе больше идею версионирования строк, чем являться привычным первичным ключём. Активно используется самой базой данных и поэтому использовать его как id не самая лучшая идея (см. подробнее
+[Confirming The Characteristics Of CTID the Column](https://dev.to/ngfizzy/postgresql-pseudocolumns-ctid-108a)).
 
 Напишите запросы, чтобы проверить, какие книги находятся в партициях p1, p2, p3.
 
+``` sql
 select CTID, book_id from books_unpopular;
+```
 
 | ctid | book\_id | title | year | genre\_id | downloads |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | \(0,4\) | 5 | Эгоистичный ген | 1989 | 2 | 400 |
 
+``` sql
 select CTID, book_id from books_popular;
+```
 
 | ctid | book\_id | title | year | genre\_id | downloads |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -61,45 +97,49 @@ select CTID, book_id from books_popular;
 | \(0,9\) | 3 | Кюхля | 1925 | 3 | 2300 |
 | \(0,10\) | 6 | Вы, конечно, шутите, мистер Фейнман! | 1985 | 8 | 1000 |
 
+``` sql
 select CTID, book_id from books_bestseller;
+```
 
 | ctid | book\_id | title | year | genre\_id | downloads |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | \(0,4\) | 4 | Понедельник начинается в субботу | 1964 | 4 | 21000 |
 | \(0,5\) | 7 | За миллиард лет до конца света | 1977 | 5 | 20000 |
 
-Приложите запросы и результаты их выполнения в отчет.
-
-Задание 4
+## Задание 4
 Составьте индекс по автору книги.
 
+``` sql
 create unique index book_author_author_id_uindex
     on book_author (author_id);
+```
 
 ![alt text](image.png)
 
-Добавьте результаты выполнения в отчет.
-
-Задание 5
+## Задание 5
 Составьте запрос для определения суммы скачиваний книг в жанре «исторический роман».
 
+``` sql
 SELECT SUM(B.downloads)
 FROM book B
          JOIN genre G ON B.genre_id = G.genre_id
 WHERE G.name = 'Romance';
+```
 
 Результат:
 
 3500
 
-Задание 6
+## Задание 6
 Составьте запрос для определения суммы скачиваний по жанрам.
 
+``` sql
 SELECT G.name, SUM(B.downloads) AS total_downloads
 FROM book B
          JOIN genre G ON B.genre_id = G.genre_id
 GROUP BY G.genre_id, G.name
 ORDER BY total_downloads DESC;
+```
 
 | name | total\_downloads |
 | :--- | :--- |
@@ -111,15 +151,17 @@ ORDER BY total_downloads DESC;
 | Epic Poetry | 500 |
 
 
-Задание 7
+## Задание 7
 Составьте запрос определения среднего числа скачиваний у авторов.
 
+``` sql
 SELECT A.name, AVG(B.downloads) AS avg_downloads
 FROM author A
          JOIN book_author BA ON A.author_id = BA.author_id
          JOIN book B ON BA.book_id = B.book_id
 GROUP BY A.author_id, A.name
 ORDER BY avg_downloads DESC;
+```
 
 | name | avg\_downloads |
 | :--- | :--- |
@@ -132,15 +174,17 @@ ORDER BY avg_downloads DESC;
 | Homer | 500 |
 | F. Scott Fitzgerald | 250 |
 
-Задание 8
+## Задание 8
 Составьте запрос для определения суммы числа скачиваний по авторам.
 
+``` sql
 SELECT A.name, SUM(B.downloads) AS total_downloads
 FROM author A
          JOIN book_author BA ON A.author_id = BA.author_id
          JOIN book B ON BA.book_id = B.book_id
 GROUP BY A.author_id, A.name
 ORDER BY total_downloads DESC;
+```
 
 | name | total\_downloads |
 | :--- | :--- |
@@ -154,14 +198,16 @@ ORDER BY total_downloads DESC;
 | F. Scott Fitzgerald | 250 |
 
 
-Задание 9
+## Задание 9
 Составьте запрос для определения количества книг у каждого автора.
 
+``` sql
 SELECT A.name, COUNT(DISTINCT B.book_id) AS num_books
 FROM author A
          JOIN book_author BA ON A.author_id = BA.author_id
          JOIN book B ON BA.book_id = B.book_id
 GROUP BY A.author_id, A.name;
+```
 
 | name | num\_books |
 | :--- | :--- |
@@ -174,18 +220,22 @@ GROUP BY A.author_id, A.name;
 | J.R.R. Tolkien | 1 |
 | Leo Tolstoy | 1 |
 
-Задание 10
+## Задание 10
 Добавьте в список жанров несколько новых жанров: детектив, фэнтези, биография.
 
+``` sql
 INSERT INTO genre (name) VALUES ('Детектив'), ('Фэнтези'), ('Биография');
+```
 
 Напишите JOIN запросы для таблиц жанры и книги: INNER JOIN, LEFT OUTER JOIN, RIGHT OUTER JOIN, FULL JOIN.
 
 INNER JOIN:
 
+``` sql
 SELECT G.name, B.title
 FROM genre G
 INNER JOIN book B ON G.genre_id = B.genre_id;
+```
 
 | name | title |
 | :--- | :--- |
@@ -200,9 +250,11 @@ INNER JOIN book B ON G.genre_id = B.genre_id;
 
 LEFT OUTER JOIN:
 
+``` sql
 SELECT G.name, B.title
 FROM genre G
 LEFT OUTER JOIN book B ON G.genre_id = B.genre_id;
+```
 
 | name | title |
 | :--- | :--- |
@@ -225,9 +277,11 @@ LEFT OUTER JOIN book B ON G.genre_id = B.genre_id;
 
 RIGHT OUTER JOIN:
 
+``` sql
 SELECT G.name, B.title
 FROM genre G
 RIGHT OUTER JOIN book B ON G.genre_id = B.genre_id;
+```
 
 | name | title |
 | :--- | :--- |
@@ -242,9 +296,11 @@ RIGHT OUTER JOIN book B ON G.genre_id = B.genre_id;
 
 FULL JOIN:
 
+``` sql
 SELECT G.name, B.title
 FROM genre G
 FULL OUTER JOIN book B ON G.genre_id = B.genre_id;
+```
 
 | name | title |
 | :--- | :--- |
@@ -265,12 +321,21 @@ FULL OUTER JOIN book B ON G.genre_id = B.genre_id;
 | Фэнтези | null |
 | Биография | null |
 
-Задание 11
+## Задание 11
 Добавьте в список книгу:
 
 Доктор Живаго Борис Пастернак 1955 660 NULL 20300
 
 Напишите запрос по выводу списка жанров книг, для которых нет книг в таблице (с учетом особенностей сравнения с NULL).
+
+``` sql
+INSERT INTO book (title, year, genre_id, downloads) VALUES ('Доктор Живаго', 1955, 3, 20300);
+
+SELECT G.name
+FROM genre G
+         LEFT JOIN book B ON G.genre_id = B.genre_id
+WHERE B.book_id IS NULL;
+```
 
 | name |
 | :--- |
